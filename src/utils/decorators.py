@@ -1,5 +1,6 @@
 from functools import wraps
-from typing import Any, Callable, Generator
+from typing import Any
+from collections.abc import Callable, Generator
 
 
 def coroutine[**P](

@@ -22,7 +22,7 @@ def fetch_changed_movies(
     cursor: ServerCursor[Movie], next_node: Generator[None, list[Movie], None]
 ) -> Generator[None, datetime, None]:
     while last_updated := (yield):
-        logger.info(f"Fetching movies changed after %s", last_updated)
+        logger.info("Fetching movies changed after %s", last_updated)
         cursor.execute(
             "SELECT * FROM movies WHERE updated_at > %s order by updated_at asc",
             (last_updated,),
@@ -68,7 +68,7 @@ def run_etl_process() -> None:
         while True:
             last_movies_updated = state.get_state(STATE_KEY) or str(datetime.min)
             logger.info(
-                f"Starting ETL process for updates from %s ...", last_movies_updated
+                "Starting ETL process for updates from %s ...", last_movies_updated
             )
 
             fetcher_coro.send(last_movies_updated)

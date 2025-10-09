@@ -1,3 +1,5 @@
+import sys
+
 import psycopg
 from faker import Faker
 from tqdm import trange
@@ -12,7 +14,7 @@ def inject_data(amount_of_records: int = 1000, batch_size: int = 100) -> None:
         psycopg.connect(**settings.database.model_dump(by_alias=True)) as conn,
         conn.cursor() as cur,
     ):
-        for _ in trange(iterations, desc=f"Injecting {amount_of_records} records"):
+        for _ in trange(iterations, desc=f"Injecting {amount_of_records} records", file=sys.stdout):
             batch = []
             for _ in range(batch_size):
                 batch.append((fake.name(), fake.text()))

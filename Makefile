@@ -22,11 +22,6 @@ start-etl: ## start etl process
 stop-db-clear: ## stop postgres and clear all
 	docker compose down -v
 
-
-.PHONY: transfer-data
-transfer-data: ## transfer data from sqlite
-	cd 03_sqlite_to_postgres && python load_data.py
-
 .PHONY: wait_to_db
 wait_to_db:
 	bash -c "until docker exec etl_coro_db pg_isready ; do echo 'db is starting...' ; sleep 1 ; echo 'db is up' ; done"

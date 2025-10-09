@@ -25,10 +25,3 @@ CREATE TRIGGER update_user_task_updated_on
         public.movies
     FOR EACH ROW
 EXECUTE PROCEDURE update_updated_at_movie();
-
-
-
-CREATE TABLE IF NOT EXISTS temp_table (
-    id uuid PRIMARY KEY,
-    name TEXT
-);
