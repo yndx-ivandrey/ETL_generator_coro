@@ -19,7 +19,7 @@ class JsonFileStorage(BaseStorage):
         try:
             with open(self.file_path, "r") as json_file:
                 state = json.load(json_file)
-                return state if type(state) is dict else dict()
-        except (FileNotFoundError, JSONDecodeError):
+                return state if type(state) is dict else {}
+        except FileNotFoundError, JSONDecodeError:
             self._logger.warning("No state file provided. Continue with default file")
-            return dict()
+            return {}

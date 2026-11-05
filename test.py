@@ -11,7 +11,7 @@ def sum2(initial, increase, count):
         yield result
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     print("Call function:")
     sum1(0, 2, 5)
 

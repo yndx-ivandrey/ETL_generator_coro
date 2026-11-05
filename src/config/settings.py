@@ -1,9 +1,8 @@
-from typing import Self
+from typing import Annotated, Any, Self
 
 from dotenv import load_dotenv
-from pydantic import BaseModel, Field
-from pydantic.functional_validators import model_validator
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
 # использование load_dotenv() позволяет не заботиться о расположении .env файла
 # если использовать опцию env_file из SettingsConfigDict, файл .env должен быть в текущем каталоге
@@ -37,6 +36,20 @@ class AppSettings(BaseSettings):
     #     extra="ignore",
     # )
 
+    # Если готовы писать внутри .env TABLES=["movies","genres","actors"], можно так:
+    # tables: list[str] = Field(default_factory=list)
+
+    tables: Annotated[list[str], NoDecode]
+
+    @field_validator("tables", mode="before")
+    @classmethod
+    def validate_tables(cls, v: Any) -> Any:
+        if isinstance(v, str):
+            return [i.strip() for i in v.split(",")] if len(v) > 0 else []
+        return v
+
+
+class AppSettings2(BaseSettings):
     tables: str
     tables_list: list[str] = Field(default_factory=list)
 

@@ -14,20 +14,24 @@ def coroutine(func):
     return inner
 ```
 
-Для python 3.11 и ниже типизируем декоратор через ParamSpec
+Для python 3.11 и ниже типизируем декоратор через ParamSpec и TypeVar
 
 ```python
+from collections.abc import Callable, Generator
 from functools import wraps
-from typing import Any, Callable, Generator, ParamSpec
+from typing import ParamSpec, TypeVar
 
 F_Spec = ParamSpec("F_Spec")
+Y = TypeVar("Y")
+S = TypeVar("S")
+R = TypeVar("R")
 
 
 def coroutine(
-    func: Callable[F_Spec, Generator[Any, Any, Any]],
-) -> Callable[F_Spec, Generator[Any, Any, Any]]:
+    func: Callable[F_Spec, Generator[Y, S, R]],
+) -> Callable[F_Spec, Generator[Y, S, R]]:
     @wraps(func)
-    def inner(*args: F_Spec.args, **kwargs: F_Spec.kwargs) -> Generator[Any, Any, Any]:
+    def inner(*args: F_Spec.args, **kwargs: F_Spec.kwargs) -> Generator[Y, S, R]:
         fn = func(*args, **kwargs)
         next(fn)
         return fn
@@ -35,22 +39,21 @@ def coroutine(
     return inner
 ```
 
-Начиная с версии 3.12 можно использовать дженерики:
+Начиная с версии 3.12, можно использовать дженерики:
 
 ```python
+from collections.abc import Callable, Generator
 from functools import wraps
-from typing import Any, Callable, Generator
 
 
-def coroutine[**P](
-    func: Callable[P, Generator[Any, Any, Any]],
-) -> Callable[P, Generator[Any, Any, Any]]:
+def coroutine[Y, S, R, **P](
+    func: Callable[P, Generator[Y, S, R]],
+) -> Callable[P, Generator[Y, S, R]]:
     @wraps(func)
-    def inner(*args: P.args, **kwargs: P.kwargs) -> Generator[Any, Any, Any]:
+    def inner(*args: P.args, **kwargs: P.kwargs) -> Generator[Y, S, R]:
         fn = func(*args, **kwargs)
         next(fn)
         return fn
 
     return inner
-
 ```

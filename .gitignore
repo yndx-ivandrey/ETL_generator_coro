@@ -10,3 +10,4 @@ storage.json
 
 # Virtual environments
 .venv
+.env

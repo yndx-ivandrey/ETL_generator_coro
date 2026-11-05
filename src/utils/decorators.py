@@ -1,13 +1,12 @@
-from functools import wraps
-from typing import Any
 from collections.abc import Callable, Generator
+from functools import wraps
 
 
-def coroutine[**P](
-    func: Callable[P, Generator[Any, Any, Any]],
-) -> Callable[P, Generator[Any, Any, Any]]:
+def coroutine[Y, S, R, **P](
+    func: Callable[P, Generator[Y, S, R]],
+) -> Callable[P, Generator[Y, S, R]]:
     @wraps(func)
-    def inner(*args: P.args, **kwargs: P.kwargs) -> Generator[Any, Any, Any]:
+    def inner(*args: P.args, **kwargs: P.kwargs) -> Generator[Y, S, R]:
         fn = func(*args, **kwargs)
         next(fn)
         return fn

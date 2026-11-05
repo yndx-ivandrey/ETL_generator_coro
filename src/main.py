@@ -1,6 +1,6 @@
+from collections.abc import Generator
 from datetime import datetime
 from time import sleep
-from typing import Generator
 
 import psycopg
 from psycopg import ServerCursor
@@ -19,8 +19,8 @@ STATE_KEY = "last_movies_updated"
 
 @coroutine
 def fetch_changed_movies(
-    cursor: ServerCursor[Movie], next_node: Generator[None, list[Movie], None]
-) -> Generator[None, datetime, None]:
+    cursor: ServerCursor[Movie], next_node: Generator[None, list[Movie]]
+) -> Generator[None, str]:
     while last_updated := (yield):
         logger.info("Fetching movies changed after %s", last_updated)
         cursor.execute(
@@ -33,8 +33,8 @@ def fetch_changed_movies(
 
 @coroutine
 def transform_movies(
-    next_node: Generator[None, list[Movie], None],
-) -> Generator[None, list[Movie], None]:
+    next_node: Generator[None, list[Movie]],
+) -> Generator[None, list[Movie]]:
     while movies := (yield):
         logger.info("Received for transform %s movies", len(movies))
         for movie in movies:
@@ -44,7 +44,7 @@ def transform_movies(
 
 
 @coroutine
-def save_movies(state: State) -> Generator[None, list[Movie], None]:
+def save_movies(state: State) -> Generator[None, list[Movie]]:
     while movies := (yield):
         logger.debug("Received for saving %s movies", len(movies))
         print([movie.model_dump_json() for movie in movies])
@@ -54,19 +54,29 @@ def save_movies(state: State) -> Generator[None, list[Movie], None]:
 def run_etl_process() -> None:
     state = State(JsonFileStorage(logger=logger))
 
-    dsn = make_conninfo(**settings.database.model_dump(by_alias=True))
+    dsn = make_conninfo(**settings.database.model_dump())
     print(dsn)
 
     with (
         psycopg.connect(dsn, row_factory=class_row(Movie)) as conn,
         ServerCursor(conn, "fetcher") as cur,
     ):
-        saver_coro = save_movies(state)
-        transformer_coro = transform_movies(next_node=saver_coro)
-        fetcher_coro = fetch_changed_movies(cursor=cur, next_node=transformer_coro)
+        # saver_coro = save_movies(state)
+        # transformer_coro = transform_movies(next_node=saver_coro)
+        # fetcher_coro = fetch_changed_movies(cursor=cur, next_node=transformer_coro)
 
+        fetcher_coro = fetch_changed_movies(
+            cursor=cur,
+            next_node=transform_movies(
+                next_node=save_movies(state),
+            ),
+        )
+        """
+         Extract(fetch_changed_movies) --send--> Transform (transform_movies) --send--> Load (save_movies)
+        """
         while True:
-            last_movies_updated = state.get_state(STATE_KEY) or str(datetime.min)
+            last_movies_updated: str = state.get_state(STATE_KEY) or str(datetime.min)
+
             logger.info(
                 "Starting ETL process for updates from %s ...", last_movies_updated
             )

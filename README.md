@@ -2,11 +2,11 @@
 
 ```python
 def coro():
-    print('Начало работы корутины')
-    val = (yield)
-    print(f'В корутину пришло значение: {val}')
+    print("Начало работы корутины")
+    val = yield
+    print(f"В корутину пришло значение: {val}")
     yield val * 2
-    print('Завершение работы корутины')
+    print("Завершение работы корутины")
 ```
 ```
 >>> c = coro()
@@ -28,8 +28,9 @@ StopIteration
 
 Как типизировать декоратор для корутин [ссылка](doc/decorators.md)
 
-Запуск проекта:
+Запуск проекта (python 3.15):
 ```shell
+cp .env.example .env
 docker compose up -d
 uv sync
 cd src
